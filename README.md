@@ -4,6 +4,8 @@ Working with the [Overture Maps](https://overturemaps.org/) data in Neo4j.
 
 ## Querying Overture Maps Data With AWS Athena
 
+![](img/athena1.png)
+
 ```SQL
 CREATE EXTERNAL TABLE `admins`(
   `id` string,
@@ -108,18 +110,25 @@ MSCK REPAIR TABLE `transportation`
 ```
 
 
-All places in bounds of USA
+All places in bounds of Colorado
 
 ```SQL
+
 SELECT
-    *,  ST_GeomFromBinary(geometry)
+    id, updatetime, version, confidence, websites, socials, emails, phones, type,
+    ST_X(ST_GeomFromBinary(geometry)) as longitude,
+    ST_Y(ST_GeomFromBinary(geometry)) as latitude,
+    json_extract_scalar(cast(categories as json), '$.main') as category,
+    json_extract(cast(categories as json), '$.alternate') as alt_categories,
+    json_extract_scalar(cast(names as json), '$.common[0].value') as name, 
+    cast(brand as json) as brand, cast(addresses as json) as addresses, cast(sources as json) as sources 
 FROM
     places
 WHERE
-        bbox.minX >  -171.791110603
-    AND bbox.maxX <  -66.96466
-    AND bbox.minY >  18.91619
-    AND bbox.maxY <  71.3577635769
+        bbox.minX >  -109.060253
+    AND bbox.maxX <  -102.041524
+    AND bbox.minY >  36.992426
+    AND bbox.maxY <  41.003444
 ```
 
 
@@ -155,6 +164,8 @@ WHERE
 
 * https://feyeandal.me/blog/access_overture_data_using_athena
 * https://github.com/OvertureMaps/data/blob/main/athena_setup_queries.sql#L77
+* https://docs.aws.amazon.com/athena/latest/ug/extracting-data-from-JSON.html
+* https://trino.io/docs/current/functions/geospatial.html
 
 
 ## Notebooks
@@ -179,3 +190,21 @@ Update `.env` with any relevant environment variables, then to start Jupyter:
 poetry shell
 jupyter notebook
 ```
+
+## Graph Models
+
+### Places
+
+### Admins
+
+### Transportation
+
+### Buildings
+
+## Visualization
+
+### Neo4j Bloom
+
+### Neodash
+
+![](img/neodash1.png)
