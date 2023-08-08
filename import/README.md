@@ -5,6 +5,34 @@
 
 ![](../img/import1.png)
 
+![](../img/import5.png)
+
+## Transportation
+
+```
+ csvclean -b transportation_lasvegas.csv
+```
+
+```cypher
+CREATE CONSTRAINT FOR (s:Node) REQUIRE s.id IS UNIQUE
+```
+
+
+```cypher
+LOAD CSV WITH HEADERS FROM "file:///transportation_lasvegas_out.csv" AS row
+MERGE (n:Node {id: row.id})
+ON CREATE SET
+    n.wkt = row.wkt,
+    n.subtype = row.subtype,
+    n.road = row.road,
+    n.updateTime = row.updatetime,
+    n.type = row.type,
+    n.version = row.version,
+    n.connectors = row.connectors
+
+RETURN COUNT(*)
+```
+
 ## Places
 
 _TODO: graph data model diagram_

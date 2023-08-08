@@ -110,7 +110,7 @@ MSCK REPAIR TABLE `transportation`
 ```
 
 
-All places in bounds of Colorado
+All places in bounds of Clark County, Nevada
 
 ```SQL
 
@@ -120,30 +120,41 @@ SELECT
     ST_Y(ST_GeomFromBinary(geometry)) as latitude,
     json_extract_scalar(cast(categories as json), '$.main') as category,
     json_extract(cast(categories as json), '$.alternate') as alt_categories,
-    json_extract_scalar(cast(names as json), '$.common[0].value') as name, 
-    cast(brand as json) as brand, cast(addresses as json) as addresses, cast(sources as json) as sources 
+    json_extract_scalar(cast(names as json), '$.common[0].value') as name,
+    json_extract(json_array_get(cast(sources as json), 0), '$.dataset') as source_dataset,
+    json_extract(json_array_get(cast(sources as json), 0), '$.recordid') as source_recordid,
+    json_extract(json_array_get(cast(addresses as json), 0), '$.freeform') as street_address,
+    json_extract(json_array_get(cast(addresses as json), 0), '$.locality') as locality,
+    json_extract(json_array_get(cast(addresses as json), 0), '$.postcode') as postcode,
+    json_extract(json_array_get(cast(addresses as json), 0), '$.region') as region,
+    json_extract(json_array_get(cast(addresses as json), 0), '$.country') as country
 FROM
     places
 WHERE
-        bbox.minX >  -109.060253
-    AND bbox.maxX <  -102.041524
-    AND bbox.minY >  36.992426
-    AND bbox.maxY <  41.003444
+        bbox.minX >  -115.896925
+    AND bbox.maxX <  -114.042819
+    AND bbox.minY >  35.001857
+    AND bbox.maxY <  36.853662
 ```
 
 
-Transportation theme for bounds of Colorado
+Transportation theme for bounds of Clark County, NV
 
 ```SQL
 SELECT
-    *,  ST_GeomFromBinary(geometry)
+    id, updatetime, version, subtype, connectors, type, 
+    ST_GeomFromBinary(geometry) as wkt,
+    coalesce(try(ST_X(ST_GeomFromBinary(geometry))), 0) as longitude,
+    coalesce(try(ST_Y(ST_GeomFromBinary(geometry))), 0) as latitude,
+    json_array_get(cast(connectors as json), 0) as connector_from,
+    json_array_get(cast(connectors as json), 1) as connector_to
 FROM
     "transportation"
 WHERE
-        bbox.minX >  -109.060253
-    AND bbox.maxX <  -102.041524
-    AND bbox.minY >  36.992426
-    AND bbox.maxY <  41.003444
+        bbox.minX >  -115.896925
+    AND bbox.maxX <  -114.042819
+    AND bbox.minY >  35.001857
+    AND bbox.maxY <  36.853662
 ```
 
 Admin theme for bounds of USA
@@ -166,6 +177,7 @@ WHERE
 * https://github.com/OvertureMaps/data/blob/main/athena_setup_queries.sql#L77
 * https://docs.aws.amazon.com/athena/latest/ug/extracting-data-from-JSON.html
 * https://trino.io/docs/current/functions/geospatial.html
+* https://anthonylouisdagostino.com/bounding-boxes-for-all-us-counties/
 
 
 ## Notebooks
